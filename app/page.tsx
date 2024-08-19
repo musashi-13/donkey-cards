@@ -75,13 +75,6 @@ export default function Home() {
 
     // }, []);
 
-    const handleSendMsg = ()=> { 
-        socket.emit("message", message, roomName);
-    }
-
-    const handleJoinRoom = () => {
-        socket.emit("joinRoom", roomName, userName);
-    }
     
     return (
         <main className="flex justify-center">
