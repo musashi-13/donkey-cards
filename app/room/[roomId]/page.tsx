@@ -50,11 +50,18 @@ export default function RoomPage() {
     }, []);
 
     useEffect(() => {
-        socket.on('dealCards', (cards) => {
-            console.log('Received cards:', cards);
-            // Update the state to display the cards in the UI
-        });
-    }, []);
+    const handleDealCards = (cards: any) => {
+        console.log('Received cards:', cards);
+        // Update the state to display the cards in the UI
+    };
+
+    socket.on('dealCards', handleDealCards);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+        socket.off('dealCards', handleDealCards);
+    };
+}, []);
 
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
