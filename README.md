@@ -16,7 +16,7 @@ Other collaborators: [Kaushik Bhat](https://github.com/kaushik-bhat)
 - [X] Create lobby UI
 - [X] Create Room UI
 - [X] Routing for rooms
-- [X] COnnecting to donkey-cards-server
+- [X] Connecting to donkey-cards-server
 - [X] Create, Join and Start games in Rooms between clients and server
 - [X] Use API to produce deckId for the room and distribute cards to players in the room on the server side
 - [ ] Recieve and display cards on the client
@@ -29,6 +29,6 @@ Other collaborators: [Kaushik Bhat](https://github.com/kaushik-bhat)
 Host on AWS
 
 
-*developer notes*
+`developer notes`
 
-`need to look into buying a domain and launching this if it works`
+*need to look into buying a domain and launching this if it works*
