@@ -7,6 +7,8 @@ Making a online multiplayer game with websockets based on the popular card game 
 
 Other collaborators: [Kaushik Bhat](https://github.com/kaushik-bhat)
 
+Server code: [donkey-cards-server](https://github.com/musashi-13/donkey-cards-server)
+
 ## Road Map
 
 **Stage 1**
