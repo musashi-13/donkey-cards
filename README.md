@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Multiplayer cards game using next.js and websockets.
 
-## Getting Started
+**12 Weeks: 12 Projects**
 
-First, run the development server:
+Week 2:
+Making a online multiplayer game with websockets based on the popular card game donkey [deckOfCardsAPI](deckofcardsapi.com).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Other collaborators: [Kaushik Bhat](https://github.com/kaushik-bhat)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Road Map
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Stage 1**
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- [X] Create Road Map - README.md
+- [X] Deployment - Vercel
+- [X] Create lobby UI
+- [X] Create Room UI
+- [X] Routing for rooms
+- [X] COnnecting to donkey-cards-server
+- [X] Create, Join and Start games in Rooms between clients and server
+- [X] Use API to produce deckId for the room and distribute cards to players in the room on the server side
+- [ ] Recieve and display cards on the client
+- [ ] Make cards interactable and send client moves to server for processing
+- [ ] Enforce game rules in server side
+- [ ] Smoothen out connection and disconnection
 
-## Learn More
+**Stage 2**
 
-To learn more about Next.js, take a look at the following resources:
+Host on AWS
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+*developer notes*
+`need to look into buying a domain and launching this if it works`
