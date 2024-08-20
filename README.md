@@ -31,4 +31,4 @@ Host on AWS
 
 `developer notes`
 
-*need to look into buying a domain and launching this if it works*
+* need to look into buying a domain and launching this if it works
