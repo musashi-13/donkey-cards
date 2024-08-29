@@ -14,3 +14,10 @@ body {
     text-wrap: balance;
   }
 }
+
+.custom-cards{
+  --rotate: calc(var(--index) - var(--totalCards)/2);
+  --degree: calc(180/var(--totalCards));
+  rotate: calc(var(--rotate)*var(--degree)*1deg);
+  transform-origin:  bottom left;
+}
