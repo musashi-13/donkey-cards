@@ -6,6 +6,7 @@ const io = require('socket.io')(3000, {
         credentials: true
     }
 });
+const { determineStartingPlayer, playRound, checkEndCondition } = require('./gameLogic');
 const rooms = {};
 
 io.on('connection', (socket) => {
@@ -15,7 +16,7 @@ io.on('connection', (socket) => {
         console.log('joinRoom: ' + roomName + ' ' + userName);
         socket.username = userName;
         if (!rooms[roomName]) {
-            rooms[roomName] = { players: [], deckId: null, hands: {} };
+            rooms[roomName] = { players: [], deckId: null, hands: {}, currentSuit: null };
         }
         rooms[roomName].players.push(userName);
         socket.join(roomName);
@@ -24,36 +25,44 @@ io.on('connection', (socket) => {
 
     socket.on('startGame', async (roomName) => {
         console.log("game started for " + roomName);
-        if (rooms[roomName] && rooms[roomName].players.length > 0) {
+        const room = rooms[roomName];
+        if (room && room.players.length > 0) {
             // Create a new deck if not already created
-            console.log("getting deckId for " + roomName)
-            if (!rooms[roomName].deckId) {
+            if (!room.deckId) {
                 const deckResponse = await axios.get('https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1');
-                rooms[roomName].deckId = deckResponse.data.deck_id;
+                room.deckId = deckResponse.data.deck_id;
             }
-            const deckId = rooms[roomName].deckId;
-            const players = rooms[roomName].players;
-            const totalPlayers = (players.length > 3) ? players.length : 4;
-            const cardsPerPlayer = Math.floor(52 / totalPlayers);
-            const extraCards = 52 % totalPlayers;
-            const shuffledPlayers = players.sort(() => 0.5 - Math.random());
-            for (let i = 0; i < totalPlayers; i++) {
-                // Calculate the number of cards for the current player
+            const deckId = room.deckId;
+            const players = room.players;
+            const cardsPerPlayer = Math.floor(52 / players.length);
+            const extraCards = 52 % players.length;
+
+            for (let i = 0; i < players.length; i++) {
                 const numCards = i < extraCards ? cardsPerPlayer + 1 : cardsPerPlayer;
-            
-                // Draw the cards for the current player
                 const drawResponse = await axios.get(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${numCards}`);
-                rooms[roomName].hands[shuffledPlayers[i]] = drawResponse.data.cards;
+                room.hands[players[i]] = drawResponse.data.cards;
             }
 
-            // Send cards to each player
-            for (const player of rooms[roomName].players) {
-                const playerSocketId = Object.keys(io.sockets.sockets).find(id => io.sockets.sockets[id].username === player);
-                io.to(playerSocketId).emit('dealCards', rooms[roomName].hands[player]);
+            const startingPlayer = determineStartingPlayer(players, room.hands);
+            if (startingPlayer) {
+                room.currentSuit = 'SPADES'; // Start with Spades
+                io.to(roomName).emit('roundStart', startingPlayer, room.currentSuit);
             }
-            console.log("Sent cards")
-        } else {
-            console.log("There are no players")
+        }
+    });
+
+    socket.on('playCard', (roomName, player, card) => {
+        const room = rooms[roomName];
+        const players = room.players;
+        if (room && players.includes(player)) {
+            const nextPlayer = playRound(room, room.currentSuit, players);
+            const loser = checkEndCondition(room);
+            if (loser) {
+                io.to(roomName).emit('gameEnd', loser);
+            } else {
+                room.currentSuit = card.suit; // Set the current suit for the next round
+                io.to(roomName).emit('roundStart', nextPlayer, room.currentSuit);
+            }
         }
     });
 
