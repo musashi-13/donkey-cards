@@ -5,13 +5,12 @@ import { useParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import socket from "@/app/socket";
 import { CSSProperties } from "react";
-import DndProviderWrapper from "@/app/_components/DndProviderWrapper";
+import tempCards from "@/app/_components/tempcards";
 
-import DraggableCard from '@/app/_components/DraggableCard';
-import DropArea from "@/app/_components/DropArea";
 interface Players {
     id: string;
     username: string;
+    totalCards: number;
     hand: string[];    
 }
 
@@ -64,146 +63,59 @@ const sortCards = (cards: { code: string, image: string, images: { svg: string, 
     });
 };
 
-const tempCards = sortCards([
-    {
-        "code": "KC",
-        "image": "https://deckofcardsapi.com/static/img/KC.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/KC.svg",
-            "png": "https://deckofcardsapi.com/static/img/KC.png"
-        },
-        "value": "KING",
-        "suit": "CLUBS"
-    },
-    {
-        "code": "6H",
-        "image": "https://deckofcardsapi.com/static/img/6H.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/6H.svg",
-            "png": "https://deckofcardsapi.com/static/img/6H.png"
-        },
-        "value": "6",
-        "suit": "HEARTS"
-    },
-    {
-        "code": "5D",
-        "image": "https://deckofcardsapi.com/static/img/5D.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/5D.svg",
-            "png": "https://deckofcardsapi.com/static/img/5D.png"
-        },
-        "value": "5",
-        "suit": "DIAMONDS"
-    },
-    {
-        "code": "0H",
-        "image": "https://deckofcardsapi.com/static/img/0H.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/0H.svg",
-            "png": "https://deckofcardsapi.com/static/img/0H.png"
-        },
-        "value": "10",
-        "suit": "HEARTS"
-    },
-    {
-        "code": "8C",
-        "image": "https://deckofcardsapi.com/static/img/8C.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/8C.svg",
-            "png": "https://deckofcardsapi.com/static/img/8C.png"
-        },
-        "value": "8",
-        "suit": "CLUBS"
-    },
-    {
-        "code": "6D",
-        "image": "https://deckofcardsapi.com/static/img/6D.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/6D.svg",
-            "png": "https://deckofcardsapi.com/static/img/6D.png"
-        },
-        "value": "6",
-        "suit": "DIAMONDS"
-    },
-    {
-        "code": "JS",
-        "image": "https://deckofcardsapi.com/static/img/JS.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/JS.svg",
-            "png": "https://deckofcardsapi.com/static/img/JS.png"
-        },
-        "value": "JACK",
-        "suit": "SPADES"
-    },
-    {
-        "code": "8D",
-        "image": "https://deckofcardsapi.com/static/img/8D.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/8D.svg",
-            "png": "https://deckofcardsapi.com/static/img/8D.png"
-        },
-        "value": "8",
-        "suit": "DIAMONDS"
-    },
-    {
-        "code": "4S",
-        "image": "https://deckofcardsapi.com/static/img/4S.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/4S.svg",
-            "png": "https://deckofcardsapi.com/static/img/4S.png"
-        },
-        "value": "4",
-        "suit": "SPADES"
-    },
-    {
-        "code": "KS",
-        "image": "https://deckofcardsapi.com/static/img/KS.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/KS.svg",
-            "png": "https://deckofcardsapi.com/static/img/KS.png"
-        },
-        "value": "KING",
-        "suit": "SPADES"
-    },
-    {
-        "code": "QC",
-        "image": "https://deckofcardsapi.com/static/img/QC.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/QC.svg",
-            "png": "https://deckofcardsapi.com/static/img/QC.png"
-        },
-        "value": "QUEEN",
-        "suit": "CLUBS"
-    },
-    {
-        "code": "6C",
-        "image": "https://deckofcardsapi.com/static/img/6C.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/6C.svg",
-            "png": "https://deckofcardsapi.com/static/img/6C.png"
-        },
-        "value": "6",
-        "suit": "CLUBS"
-    },
-    {
-        "code": "0C",
-        "image": "https://deckofcardsapi.com/static/img/0C.png",
-        "images": {
-            "svg": "https://deckofcardsapi.com/static/img/0C.svg",
-            "png": "https://deckofcardsapi.com/static/img/0C.png"
-        },
-        "value": "10",
-        "suit": "CLUBS"
-    }
-])
 
 export default function RoomPage() {
     const [userName, setUserName] = useState<string>('');
     const [errMsg, setErrMsg] = useState<string>('');
     const [isOpen, setIsOpen] = useState<Boolean>(true);
     const [isCopied, setIsCopied] = useState<Boolean>(false);
-    const [players, setPlayers] = useState<Players[]>([]);
+    const [players, setPlayers] = useState<Players[]>([{id: "test", username: "musashi", totalCards: 10, hand: []}]);
     const [cards, setCards] = useState<Cards[]>([]);
+    
+
+    useEffect(() => {
+        setCards(sortCards(tempCards));
+      }, [tempCards]);
+
+    const [selectedCards, setSelectedCards] = useState<Cards[]>([]);
+    const [roundCards, setRoundCards] = useState<Cards[]>([]);
+
+    const handleAddBack = () => {
+        if(selectedCards.length == 0) {
+            return;
+        }
+        const removedSelectedCard = selectedCards.splice(0, 1)[0];
+        const updatedCards = [...cards];
+        updatedCards.push(removedSelectedCard);
+        setCards(sortCards(updatedCards));
+    }
+    
+    const handleCardClick = (card: Cards, index: number) => {
+        if(selectedCards.length == 0) {
+            const updatedCards = [...cards];
+            const removedCard = updatedCards.splice(index, 1)[0]; // Capture the removed card
+            setCards(updatedCards);
+            setSelectedCards((prevSelectedCards) => [...prevSelectedCards, removedCard]); // Append the removed card to selectedCards
+        } else {
+            const removedSelectedCard = selectedCards.splice(0, 1)[0];
+            const updatedCards = [...cards];
+            const removedCard = updatedCards.splice(index, 1)[0];
+            updatedCards.splice(index, 0, removedSelectedCard);
+            setSelectedCards((prevSelectedCards) => [...prevSelectedCards, removedCard]);
+            setCards(sortCards(updatedCards));
+        }
+    }
+
+    const handleAddToRound = () => {
+        if(selectedCards.length == 0) {
+            return;
+        }
+        const updatedRoundCards = [...roundCards];
+        const updatedSelectedCards = [...selectedCards];
+        updatedRoundCards.push(updatedSelectedCards[0]);
+        setSelectedCards([]);
+        setRoundCards(updatedRoundCards);
+    }
 
     const params = useParams();
     const roomId = params.roomId.toString();
@@ -215,41 +127,6 @@ export default function RoomPage() {
         dom: null as HTMLElement | null,
         x: null as number | null,
         y: null as number | null
-    }
-    const handleMouseDown = (e: React.MouseEvent) => {  
-        const target = e.target as HTMLElement;
-        if(target.classList.contains('custom-cards')){
-            cursor = {
-                x: e.clientX,
-                y: e.clientY
-            }
-            note = {
-                dom: target,
-                x: target.getBoundingClientRect().left,
-                y: target.getBoundingClientRect().top
-            }
-        }
-    }
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if(note.dom == null) return;
-        let currentCursor = {
-            x: e.clientX,
-            y: e.clientY
-        }
-        let distance = {
-            x: cursor.x !== null ? currentCursor.x - cursor.x : 0,
-            y: cursor.y !== null ? currentCursor.y - cursor.y : 0
-        }
-        note.dom.style.left = (note.x !== null ? note.x + distance.x : 0) - 216 + 'px';
-        note.dom.style.top = (note.y !== null ? note.y + distance.y : 0) - 216 + 'px';
-        note.dom.style.cursor = 'grab';
-    }
-
-    const handleMouseUp = (e: React.MouseEvent) => {
-        if( note.dom == null) return;
-        note.dom.style.cursor = 'auto';
-        note.dom = null;  
     }
 
     useEffect(() => {
@@ -345,23 +222,9 @@ export default function RoomPage() {
     }, [players]);
 
     return (
-        <div className="font-handwriting flex" onMouseDown={(e)=>handleMouseDown(e)} onMouseMove={(e)=>handleMouseMove(e)} onMouseUp={(e)=>handleMouseUp(e)}>
-            <div className="flex flex-col gap-2 w-64 h-screen bg-yellow-50 border-4 p-2 items-center border-black ring-4 ring-white">
-                <h1 className="text-2xl">Your Room</h1>
-                <p className="text-3xl tracking-widest">{roomId}</p>
-                <button className="text-md" onClick={getCopyLink}><u>Share the link</u> {!isCopied ? <FontAwesomeIcon icon={faCopy} size="sm"/> : <FontAwesomeIcon icon={faClipboard} size="sm"/>}</button>
-                <button onClick={handleStartGame} type="submit" className="border-2 bg-white border-black w-28 pt-1.5 pb-1 rounded-lg">
-                    Start Game
-                </button>
-                <p className="mt-4 font-bold mb-2">Players: </p>
-                <ul className="text-center">
-                    {players.map((player, index) => (
-                        <li key={index}>{player.username}</li>
-                    ))}
-                </ul>
-            </div>
+        <div className="font-handwriting relative w-full font-bold h-screen flex flex-col">
             {!isOpen &&
-                <form onSubmit={handlePlay} className="font-bold absolute top-0 left-0 bg-zinc-900/20 backdrop-blur-sm w-screen h-screen flex items-center justify-center">
+                <form onSubmit={handlePlay} className="absolute top-0 left-0 bg-zinc-900/20 backdrop-blur-sm w-screen h-screen flex items-center justify-center">
                     <div className="flex flex-col gap-6 bg-yellow-50 rounded-lg border-4 p-4 items-center border-black ring-4 ring-white">
                         <h1 className="text-3xl ">Enter Username</h1>
                         <input value={userName} onChange={(e) => setUserName(e.target.value)} className="h-6 px-1 w-40 text-xl tracking-wider outline-none border-b-2 bg-yellow-50 border-black"/>
@@ -369,14 +232,93 @@ export default function RoomPage() {
                     </div>
                 </form>
             }
-            <div className="relative w-full h-full flex flex-col">
-                <div className="relative bg-red-50 h-[420px]">
-                    {tempCards.map((card, index) => (
+            <div className="relative h-1/2 flex m-4 font-bold">
+                <div className="flex flex-col gap-2 w-64 h-full bg-yellow-50 rounded-lg border-4 p-2 items-center border-black ring-4 ring-white">
+                    <h1 className="text-2xl">Your Room</h1>
+                    <p className="text-3xl tracking-widest">{roomId}</p>
+                    <button className="text-md" onClick={getCopyLink}><u>Share the link</u> {!isCopied ? <FontAwesomeIcon icon={faCopy} size="sm"/> : <FontAwesomeIcon icon={faClipboard} size="sm"/>}</button>
+                    <button onClick={handleStartGame} type="submit" className="border active:scale-90 duration-150 bg-white border-black w-28 pt-1.5 pb-1 rounded-lg">
+                        Start Game
+                    </button>
+                    <p className="mt-4 text-lg font-bold mb-2">Players: {players.length}</p>
+                    <ul className="text-center">
+                        {players.map((player, index) => (
+                            <li key={index}>{player.username}</li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="relative flex flex-grow">
+                    <div className="relative w-72 flex flex-col items-end justify-center">
+                        <div className="relative w-48 h-64 bg-blue-950/30 border-2 border-dashed border-yellow-100">
+                            <p className="text-yellow-100 text-lg absolute w-2/3 text-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                            The card you want to play:</p>
+                            {selectedCards.map((card, index) => (
+                                <img
+                                    className={`w-36 absolute pop-in top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hover:scale-110 duration-200 shadow-xl shadow-gray-800/50`}
+                                    key={index}
+                                    src={card.images.png}
+                                    alt={card.code}
+                                />
+                            ))}
+                        </div>
+                        <div className="relative top-2 flex justify-around w-48 font-bold">
+                            <button onClick={handleAddToRound} className="relative active:scale-90 duration-150 border-2 bg-white border-black w-28 pt-1.5 pb-1 rounded-lg">Play Card</button>
+                            <button onClick={handleAddBack} className="relative active:scale-90 duration-150 border-2 bg-white border-black w-12 pt-1.5 pb-1 rounded-lg">X</button>
+                        </div>                 
+                    </div>
+                    <div className="relative flex-grow -rotate-12">
+                        {cards.map((card, index) => (
+                            <img
+                                id={`card-${index}`}
+                                className={`w-36 absolute slide-in top-20 left-1/2 -translate-y-8 hover:scale-110 duration-200 custom-cards shadow-xl shadow-gray-800/50`}
+                                style={{
+                                    '--index': index,   
+                                    '--totalCards': cards.length,
+                                } as CustomCSSProperties}
+                                key={index}
+                                src={card.images.png}
+                                alt={card.code}
+                                onClick={() => handleCardClick(card, index)}
+                            />
+                        ))}
+                    </div>
+                </div>
+                
+            </div>
+            <div className="flex items-center justify-around">
+            <div className="relative">
+                    {players.map((player, index) => (
+                        <div className="relative flex flex-col items-center">
+                            <div className="relative h-16 w-16">
+                            {Array.from({ length: player.totalCards }).map((_, index) => (
+                                <div key={index} 
+                                className="absolute left-1/4 top-3 translate-y-1 hand-cards card-bg w-10 h-16 border-4 
+                                rounded-sm border-white ring-2 ring-zinc-600"
+                                style={{
+                                    '--index': index,   
+                                    '--totalCards': player.totalCards,
+                                } as CustomCSSProperties}   
+                                >
+                                </div> 
+                            ))}
+                        </div>
+                            <div key={index} className="relative flex items-center gap-2 text-xl">
+                                {index === 0 && <p>👑</p>}
+                                <p>{player.username}</p>
+                                <p>({player.totalCards})</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="relative w-[480px] h-72 bg-green-700 shadow-inner shadow-black/50 border-8 border-yellow-100 rounded-full">
+                    <p className="text-yellow-100 text-lg absolute w-2/3 text-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    Start the round!</p>
+                    {roundCards.map((card, index) => (
                         <img
-                            className={`w-36 absolute top-16 left-1/2 -translate-y-4 hover:scale-110 duration-200 custom-cards shadow-xl shadow-gray-800/50`}
+                            className={`w-36 absolute round-cards top-1/2 left-1/2 shadow-lg shadow-gray-800/50`}
                             style={{
-                                '--index': index,
-                                '--totalCards': tempCards.length,
+                                '--index': index,   
+                                '--totalCards': 18,
                             } as CustomCSSProperties}
                             key={index}
                             src={card.images.png}
@@ -384,8 +326,29 @@ export default function RoomPage() {
                         />
                     ))}
                 </div>
-                <div className="relative bg-yellow-50 w-full h-[356px] flex justify-center items-center">
-                    <div className="w-48 h-64 bg-blue-300"></div>
+                <div className="relative">
+                    {players.map((player, index) => (
+                        <div className="relative flex flex-col items-center">
+                            <div className="relative h-16 w-16">
+                            {Array.from({ length: player.totalCards }).map((_, index) => (
+                                <div key={index} 
+                                className="absolute left-1/4 top-3 translate-y-1 hand-cards card-bg w-10 h-16 border-4 
+                                rounded-sm border-white ring-2 ring-zinc-600"
+                                style={{
+                                    '--index': index,   
+                                    '--totalCards': player.totalCards,
+                                } as CustomCSSProperties}   
+                                >
+                                </div> 
+                            ))}
+                        </div>
+                            <div key={index} className="relative flex items-center gap-2 text-xl">
+                                {index === 0 && <p>👑</p>}
+                                <p>{player.username}</p>
+                                <p>({player.totalCards})</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
