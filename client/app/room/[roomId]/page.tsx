@@ -6,12 +6,12 @@ import { useState, useEffect, useRef } from "react";
 import socket from "@/app/socket";
 import { CSSProperties } from "react";
 import tempCards from "@/app/_components/tempcards";
+import OtherPlayerList from "@/app/_components/otherPlayerList";
 
 interface Players {
     id: string;
-    username: string;
+    userName: string;
     totalCards: number;
-    hand: string[];    
 }
 
 interface Cards {
@@ -67,11 +67,12 @@ const sortCards = (cards: { code: string, image: string, images: { svg: string, 
 export default function RoomPage() {
     const [userName, setUserName] = useState<string>('');
     const [errMsg, setErrMsg] = useState<string>('');
+    const [gameStarted, setGameStarted] = useState<Boolean>(false);
     const [isOpen, setIsOpen] = useState<Boolean>(true);
     const [isCopied, setIsCopied] = useState<Boolean>(false);
-    const [players, setPlayers] = useState<Players[]>([{id: "test", username: "musashi", totalCards: 10, hand: []}]);
+    const [players, setPlayers] = useState<Players[]>([]);
     const [cards, setCards] = useState<Cards[]>([]);
-    
+
 
     useEffect(() => {
         setCards(sortCards(tempCards));
@@ -119,15 +120,6 @@ export default function RoomPage() {
 
     const params = useParams();
     const roomId = params.roomId.toString();
-    let cursor = {
-        x: null as number | null,
-        y: null as number | null
-    }
-    let note = {
-        dom: null as HTMLElement | null,
-        x: null as number | null,
-        y: null as number | null
-    }
 
     useEffect(() => {
         const handleLoad = () => {
@@ -157,9 +149,10 @@ export default function RoomPage() {
     };
 
     useEffect(() => {
-        socket.on('updatePlayers', (updatedPlayers) => {
+        socket.on('updatePlayers', (updatedPlayers: Players[]) => {
             console.log('Player list updated:', updatedPlayers);
             setPlayers(updatedPlayers);
+            console.log('Players:', updatedPlayers);
         });
 
         return () => {
@@ -200,7 +193,7 @@ export default function RoomPage() {
 
     const getCopyLink = () => {
         if (roomId) {
-            navigator.clipboard.writeText(roomId)
+            navigator.clipboard.writeText(`http://localhost:3000/room/${roomId}`)
             .then(() => {
                 console.log('Room ID copied to clipboard');
                 setIsCopied(true);
@@ -214,6 +207,7 @@ export default function RoomPage() {
     const handleStartGame = () => {
         console.log(`Starting game in room ${roomId}`);
         socket.emit("startGame", roomId);
+        setGameStarted(true);
     };
 
     useEffect(() => {
@@ -223,8 +217,8 @@ export default function RoomPage() {
 
     return (
         <div className="font-handwriting relative w-full font-bold h-screen flex flex-col">
-            {!isOpen &&
-                <form onSubmit={handlePlay} className="absolute top-0 left-0 bg-zinc-900/20 backdrop-blur-sm w-screen h-screen flex items-center justify-center">
+            {isOpen &&
+                <form onSubmit={handlePlay} className="absolute z-50 top-0 left-0 bg-zinc-900/20 backdrop-blur-sm w-screen h-screen flex items-center justify-center">
                     <div className="flex flex-col gap-6 bg-yellow-50 rounded-lg border-4 p-4 items-center border-black ring-4 ring-white">
                         <h1 className="text-3xl ">Enter Username</h1>
                         <input value={userName} onChange={(e) => setUserName(e.target.value)} className="h-6 px-1 w-40 text-xl tracking-wider outline-none border-b-2 bg-yellow-50 border-black"/>
@@ -240,10 +234,10 @@ export default function RoomPage() {
                     <button onClick={handleStartGame} type="submit" className="border active:scale-90 duration-150 bg-white border-black w-28 pt-1.5 pb-1 rounded-lg">
                         Start Game
                     </button>
-                    <p className="mt-4 text-lg font-bold mb-2">Players: {players.length}</p>
-                    <ul className="text-center">
+                    <p className="mt-4 text-lg font-bold mb-2 ">Players: {players.length}</p>
+                    <ul className="text-center h-80 w-full overflow-scroll">
                         {players.map((player, index) => (
-                            <li key={index}>{player.username}</li>
+                            <li key={index}>{player.userName}</li>
                         ))}
                     </ul>
                 </div>
@@ -286,30 +280,7 @@ export default function RoomPage() {
                 
             </div>
             <div className="flex items-center justify-around">
-            <div className="relative">
-                    {players.map((player, index) => (
-                        <div className="relative flex flex-col items-center">
-                            <div className="relative h-16 w-16">
-                            {Array.from({ length: player.totalCards }).map((_, index) => (
-                                <div key={index} 
-                                className="absolute left-1/4 top-3 translate-y-1 hand-cards card-bg w-10 h-16 border-4 
-                                rounded-sm border-white ring-2 ring-zinc-600"
-                                style={{
-                                    '--index': index,   
-                                    '--totalCards': player.totalCards,
-                                } as CustomCSSProperties}   
-                                >
-                                </div> 
-                            ))}
-                        </div>
-                            <div key={index} className="relative flex items-center gap-2 text-xl">
-                                {index === 0 && <p>👑</p>}
-                                <p>{player.username}</p>
-                                <p>({player.totalCards})</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+            {gameStarted && <OtherPlayerList players={players} filterEven={true}/>}
                 <div className="relative w-[480px] h-72 bg-green-700 shadow-inner shadow-black/50 border-8 border-yellow-100 rounded-full">
                     <p className="text-yellow-100 text-lg absolute w-2/3 text-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     Start the round!</p>
@@ -326,30 +297,7 @@ export default function RoomPage() {
                         />
                     ))}
                 </div>
-                <div className="relative">
-                    {players.map((player, index) => (
-                        <div className="relative flex flex-col items-center">
-                            <div className="relative h-16 w-16">
-                            {Array.from({ length: player.totalCards }).map((_, index) => (
-                                <div key={index} 
-                                className="absolute left-1/4 top-3 translate-y-1 hand-cards card-bg w-10 h-16 border-4 
-                                rounded-sm border-white ring-2 ring-zinc-600"
-                                style={{
-                                    '--index': index,   
-                                    '--totalCards': player.totalCards,
-                                } as CustomCSSProperties}   
-                                >
-                                </div> 
-                            ))}
-                        </div>
-                            <div key={index} className="relative flex items-center gap-2 text-xl">
-                                {index === 0 && <p>👑</p>}
-                                <p>{player.username}</p>
-                                <p>({player.totalCards})</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                {gameStarted && <OtherPlayerList players={players} filterEven={false}/>}
             </div>
         </div>
     )
